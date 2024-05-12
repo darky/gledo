@@ -1,11 +1,15 @@
-import gleam/dynamic.{DecodeError}
+import gleam/dynamic.{type DecodeError, type Dynamic, DecodeError}
 import gleam/erlang/atom
+import gleam/option.{type Option}
 import gleam/result
 import gluple
 
-pub fn decode_option(x) {
+pub fn decode_option(x) -> Result(Option(Dynamic), List(DecodeError)) {
   case is_some(x) || is_none(x) {
-    True -> Ok(x)
+    True ->
+      x
+      |> dynamic.from
+      |> dynamic.optional(dynamic.dynamic)
     False -> Error([DecodeError("Option", dynamic.classify(x), [])])
   }
 }

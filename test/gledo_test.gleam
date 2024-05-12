@@ -20,8 +20,8 @@ pub fn decode_some_test() {
   |> dynamic.from
   |> gledo.decode_option
   |> should.equal(
-    Some(123)
-    |> dynamic.from
+    dynamic.from(123)
+    |> Some
     |> Ok,
   )
 }
@@ -30,11 +30,7 @@ pub fn decode_none_test() {
   None
   |> dynamic.from
   |> gledo.decode_option
-  |> should.equal(
-    None
-    |> dynamic.from
-    |> Ok,
-  )
+  |> should.equal(Ok(None))
 }
 
 pub fn decode_int_test() {
