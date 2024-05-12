@@ -1,29 +1,18 @@
 import gleam/dynamic.{type DecodeError, type Dynamic, DecodeError}
-import gleam/erlang/atom
-import gleam/option.{type Option}
-import gleam/result
-import gluple
+import gleam/option.{type Option, None, Some}
 
-pub fn decode_option(x) -> Result(Option(Dynamic), List(DecodeError)) {
-  case is_some(x) || is_none(x) {
-    True -> dynamic.optional(dynamic.dynamic)(x)
-    False -> Error([DecodeError("Option", dynamic.classify(x), [])])
+pub fn decode_option(
+  for_decode: Dynamic,
+) -> Result(Option(Dynamic), List(DecodeError)) {
+  let assert Ok(decoded) = dynamic.optional(dynamic.dynamic)(for_decode)
+  case decoded {
+    Some(_) as decoded -> {
+      case for_decode == dynamic.from(decoded) {
+        True -> Ok(decoded)
+        False ->
+          Error([DecodeError("Option", dynamic.classify(for_decode), [])])
+      }
+    }
+    None -> Ok(decoded)
   }
-}
-
-@external(javascript, "./gledo_ffi.mjs", "isSome")
-fn is_some(x: Dynamic) -> Bool {
-  gluple.tuple_size(x) == Ok(2)
-  && {
-    x
-    |> gluple.tuple_element(0)
-    |> result.unwrap(dynamic.from(""))
-    |> atom.from_dynamic
-  }
-  == Ok(atom.create_from_string("some"))
-}
-
-@external(javascript, "./gledo_ffi.mjs", "isNone")
-fn is_none(x: Dynamic) -> Bool {
-  atom.from_dynamic(x) == Ok(atom.create_from_string("none"))
 }
